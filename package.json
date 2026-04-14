@@ -1,0 +1,8 @@
+{
+  "name": "node-red-railway",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-red-dashboard": "latest",
+    "node-red-contrib-ui-led": "latest"
+  }
+}
