@@ -1,8 +1,10 @@
 {
-  "name": "node-red-railway",
-  "version": "1.0.0",
-  "dependencies": {
-    "node-red-dashboard": "latest",
-    "node-red-contrib-ui-led": "latest"
-  }
+    "name": "node-red-railway",
+    "version": "1.0.0",
+    "description": "Node-RED com MQTT para ESP32 no Railway",
+    "dependencies": {
+        "@flowfuse/node-red-dashboard": "latest",
+        "node-red-contrib-ui-led": "latest",
+        "node-red-node-ui-table": "latest"
+    }
 }
