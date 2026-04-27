@@ -1,16 +1,32 @@
-FROM nodered/node-red:latest
+FROM node:18-alpine
 
-USER root
-# Cria a pasta e garante que o usuário node-red seja o dono dela
-RUN mkdir -p /data && chown -R node-red:node-red /data
+# Instala Mosquitto e dependencias
+RUN apk add --no-cache \
+    mosquitto \
+        mosquitto-utils \
+            supervisor \
+                bash
 
-# Garante permissões de escrita e leitura
-RUN chmod -R 777 /data
+                # Instala Node-RED globalmente
+                RUN npm install -g --unsafe-perm node-red@3.1.0
 
-USER node-red
+                # Instala dependencias do Node-RED
+                WORKDIR /data
+                COPY package.json .
+                RUN npm install
 
-COPY package.json .
-COPY settings.js /data/settings.js
+                # Copia configuracoes
+                COPY settings.js .
+                COPY mosquitto.conf /etc/mosquitto/mosquitto.conf
+                COPY mosquitto_passwd /etc/mosquitto/passwd
+                COPY supervisord.conf /etc/supervisord.conf
 
-# Instala os nós (Dashboard, etc)
-RUN npm install --unsafe-perm --no-update-notifier --no-fund --only=production
+                # Cria diretorios necessarios
+                RUN mkdir -p /var/log/mosquitto /var/run/mosquitto && \
+                    chown -R mosquitto:mosquitto /var/log/mosquitto /var/run/mosquitto && \
+                        chmod 600 /etc/mosquitto/passwd
+
+                        EXPOSE 1880 1883 9001
+
+                        CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+                        
