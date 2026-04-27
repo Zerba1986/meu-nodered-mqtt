@@ -20,6 +20,7 @@ RUN npm install --production
 COPY settings.js /data/settings.js
 COPY mosquitto.conf /etc/mosquitto/mosquitto.conf
 COPY mosquitto_passwd /etc/mosquitto/passwd
+RUN mosquitto_passwd -U /etc/mosquitto/passwd
 COPY supervisord.conf /etc/supervisord.conf
 
 # 5. CRUCIAL: Ajuste de permissões para o Mosquitto
