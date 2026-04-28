@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-# 1. Instala dependências
+# 1. Instala dependencias
 RUN apk add --no-cache mosquitto supervisor bash util-linux
 
 # 2. Configura Node-RED
@@ -9,20 +9,25 @@ WORKDIR /data
 COPY package.json /data/
 RUN npm install --production
 
-# 3. Copia configurações do GitHub
+# 3. Copia configuracoes do GitHub
 COPY settings.js /data/settings.js
 COPY mosquitto.conf /etc/mosquitto/mosquitto.conf
-COPY mosquitto_passwd /etc/mosquitto/passwd
 COPY supervisord.conf /etc/supervisord.conf
 
-# 4. CRUCIAL: Criptografa a senha e ajusta permissões
-# O comando -U transforma "user:pass" em hash seguro
-RUN mosquitto_passwd -U /etc/mosquitto/passwd && \
-    chown mosquitto:mosquitto /etc/mosquitto/passwd && \
-    chmod 600 /etc/mosquitto/passwd && \
-    mkdir -p /var/log/mosquitto /var/lib/mosquitto /run/mosquitto && \
-    chown -R mosquitto:mosquitto /var/log/mosquitto /var/lib/mosquitto /run/mosquitto
+# 4. Cria usuario e senha no Mosquitto com mosquitto_passwd -b
+RUN mkdir -p /etc/mosquitto && \
+    mosquitto_passwd -b -c /etc/mosquitto/passwd joazeirofelipe Mqtt@Railway2026 && \
+        chown mosquitto:mosquitto /etc/mosquitto/passwd && \
+            chmod 600 /etc/mosquitto/passwd
 
-RUN chown -R node:node /data
-EXPOSE 1880 1883 9001
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+            # 5. Permissoes do Mosquitto
+            RUN mkdir -p /var/log/mosquitto /var/lib/mosquitto /run/mosquitto && \
+                chown -R mosquitto:mosquitto /var/log/mosquitto /var/lib/mosquitto /run/mosquitto /etc/mosquitto
+
+                # 6. Permissoes do Node-RED
+                RUN chown -R node:node /data
+
+                EXPOSE 1880 1883 9001
+
+                CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+                
